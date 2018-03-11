@@ -1,2 +1,4 @@
-# ubu-setup
-Bunch of bash script to install basic soft and my dotfiles on fresh Ubuntu.
+# Ubuntu Setup
+This project includes couple of simple bash scripts which save time and hustle of installing basic packages (and some dotfiles) on newly installed Ubuntu OS.
+
+Those packages include: *git, vim, tmux, xsel, htop, Vagrant, VirtualBox*****, etc.
