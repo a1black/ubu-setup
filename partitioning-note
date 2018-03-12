@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# vi: ft=sh ts=4 sw=4 et
+# Suggestion on partitioning smaller hd.
+
+function show_usage() {
+    cat <<EOF
+Usage: $(basename $0) [-d SIZE]
+Show suggestion on partitioning smaller hard drives (128-256 GB)
+for installing desktop version of Ubuntu.
+
+OPTIONS:
+    -d SIZE     Size of hard drive in GB.
+    -h          Show this message.
+EOF
+    exit 0
+}
+
+# Display entry of partition example.
+function show_header() {
+    printf "%-6s %12s %11s    %s\n" "Mount" "Size (MiB)" "Size (MB)" "Comment"
+}
+function show_entry() {
+    local kib=$(($2))
+    local kb=$(($kib*(1024**3) / (1000**3)))
+    printf "${RED}%-6s${NC} %7s MiB  ${GREEN}%7s MB${NC}   %s\n" "$1" "$kib" "$kb" "$3"
+}
+
+# Make partition size pretier. Make $1 even to $2.
+function pretty_size() {
+    echo $(($1/$2 * $2))
+}
+
+# Calculate size of swap file base of mount of RAM.
+function swap_size() {
+    local size=$(lshw -class memory 2> /dev/null | \
+        grep --color=never -ioP "(?<=size:\s)\d+(G|M)")
+    size=${size:-0M}
+    local unit="${size: -1}"
+    size=$((${size: 0:-1}))
+    if [ "${unit^}" = "G" ]; then size=$(($size*1024)); fi
+
+    if [ $size -le 2048 ]; then recommends=2048
+    elif [ $size -le 4096 ]; then recommends=$(($size/2))
+    elif [ $size -le 8192 ]; then recommends=$(($size/4))
+    elif [ $size -le 16384 ]; then recommends=$(($size*0))
+    else recommends=0
+    fi
+    echo $((($recommends+500)/1024 * 1024))
+}
+
+# Global values.
+hd=0
+if [ $(tput colors 2> /dev/null) -ge 8 ]; then
+    RED='\033[0;31m' GREEN='\033[0;32m' PURPLE='\033[0;35m' NC='\033[0m'
+else
+    RED='' GREEN='' PURPLE='' NC=''
+fi
+
+# Process script arguments.
+while getopts ":hd:" OPTION; do
+    case $OPTION in
+        h) show_usage;;
+        d) hd=$(($OPTARG));;
+        *) show_usage;;
+    esac
+done
+
+# Display size of block device /dev/sda
+sda_bytes=$(lsblk -bnd --output SIZE /dev/sda)
+sda_kb=$(($sda_bytes/(1000**3))) sda_kib=$(($sda_bytes/(1024**3)))
+printf "Hard drive ${RED}/dev/sda${NC} ${GREEN}${sda_kib}GiB${NC}/${PURPLE}${sda_kb}GB${NC}\n"
+echo "===================="
+
+# Choose disk size for partition suggestion.
+if [ $hd -gt 256 ]; then hd=256
+elif [ $hd -lt 128 ]; then hd=128
+fi
+
+hdd=$(($hd*(1000**3) / (1024**3)))
+printf "Calculate partitions for disk space: ${GREEN}${hdd}GiB${NC}/${PURPLE}${hd}GB${NC}\n"
+
+hdd=$(($hdd*1024))
+# Partitions that always has same size.
+efi=500 boot=500
+# Partitions which size depends on hardware.
+swap=$(swap_size)
+# Minimal sizes of certain partitions.
+root=20480 home=51200
+vm=81920
+win10=81920
+# Calculate the rest portitions.
+hdd=$(($hdd-$efi-$boot-$swap-$root))
+min_req=$(($hdd-$home-$vm))
+if [ $min_req -lt $win10 ]; then
+    win10=0 home=$(($hdd*50 / 100))
+    home=$(pretty_size $home 1024)
+    vm=$(($hdd-$home))
+else
+    win10=$(($hdd*45 / 100)) vm=$(($hdd*35 / 100))
+    vm=$(pretty_size $vm 1024)
+    win10=$(pretty_size $win10 1024)
+    home=$(($hdd-$vm-$win10))
+fi
+
+show_header
+show_entry "[efi]" $efi
+show_entry "/boot" $boot
+show_entry "/" $root "partition for glob packages and libs, config and log files"
+show_entry "/home" $home "partition for local packages and user media data"
+show_entry "vmdisk" $vm "partition for hosting virtual machines"
+show_entry "win10" $win10 "partition for hosting Windows 10 OS"
+show_entry "/swap" $swap "memory dump (put at the end of phys. address)"
+
+printf "\n${RED}Notes:${NC}\n"
+printf "    Partition ${GREEN}vmdisk${NC} "
+cat <<EOF
+is used to host virtual machines, Vagrant boxes
+and code for local projects in progress, which don't take alot of space.
+Having hypervisor+Vagrant is the way to go for Web development, and as bonus
+you don't need to clutter OS with web-services, databases and tone of others
+packages for web-development.
+
+EOF
+
+printf "    Partition ${GREEN}win10${NC} "
+cat <<EOF
+is primary used for running not very demanding games (usually old ones).
+Personaly, I prefer dual boot and my resons are:
+    - KVM requires you to have 2 monitors (or video signal splitter),
+two sets of input devices, two GPU and hardware support for virtualization.
+All those requirements are a big no-no for laptop setup.
+    - Running Windows on virtual machine (VirtualBox or such) involves sharing
+laptop resources and GPU passthrough, which are hits on Guest OS performance.
+    - Inability to run both system simultaneously means less gaming more working.
+EOF
