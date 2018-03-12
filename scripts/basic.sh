@@ -8,7 +8,7 @@ Install essential command-line tools and utilits.
 Also scripts setup system timezone and locale.
 OPTION:
     -R      Set Moscow time and RU locale.
-    -D      Print command, don't execute them.
+    -D      Print commands, don't execute them.
     -h      Show this message.
 
 EOF

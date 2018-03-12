@@ -27,7 +27,7 @@ while getopts ":hD" OPTION; do
 done
 
 # Check if system has GUI layer.
-dpkg -l 2> /dev/null | grep -q "xserver-xorg"
+dpkg -l 2> /dev/null | grep -q "xserver-xorg\s"
 if [ $? -ne 0 ]; then
     echo "Error: Operating system does not have graphical component."
     echo "       Abort Google Chrome installation."

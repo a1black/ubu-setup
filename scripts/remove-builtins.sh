@@ -6,7 +6,7 @@ function show_usage() {
 Usage: $(basename $0) [OPTION]
 Remove packages that comes pre-installed with Ubuntu OS.
 OPTION:
-    -D      Print command, don't execute them.
+    -D      Print commands, don't execute them.
     -h      Show this message.
 
 EOF
