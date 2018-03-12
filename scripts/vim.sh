@@ -3,7 +3,7 @@
 
 function show_usage() {
     cat << EOF
-Usage: sudo $(basename $0) [OPTION]
+Usage: $(basename $0) [OPTION]
 Install text editor Vim and plugin manager.
 OPTION:
     -u      User who will recieve Vim configuration files.
@@ -59,8 +59,8 @@ if [ $? -eq 0 ]; then
 fi
 
 # Get Vim version in system native repository.
-VIM_VERSION=$(apt-cache show vim | sed -n '/^Version:/{s/\w\+:\s\?//g p}' | \
-    head -n 1 | grep --color=never -oP "^\d+")
+VIM_VERSION=$(apt-cache show vim | sed -n '/^Version:/{s/\w\+:\s*//g p}' | \
+    head -n 1 | grep --color=never -o "^[0-9]\+")
 
 if [ $VIM_VERSION -lt 8 ]; then
     echo "==> Add unofficial Vim PPA repository."

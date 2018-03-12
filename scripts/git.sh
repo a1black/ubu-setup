@@ -3,7 +3,7 @@
 
 function show_usage() {
     cat << EOF
-Usage: sudo $(basename $0) [OPTION]
+Usage: $(basename $0) [OPTION]
 Install version control system Git.
 OPTION:
     -u      User who will recieve Git configuration files.
@@ -58,7 +58,7 @@ fi
 # Delete old version of Git if installed.
 git --version > /dev/null 2>&1
 if [ $? -eq 0 ]; then
-    GIT_VERSION=$(git --version | grep -ioP '(?<=git version )\d+\.\d+')
+    GIT_VERSION=$(git --version | grep --color=never -ioP '(?<=git version )\d+\.\d+')
     if check_version "$GIT_VERSION"; then
         _exit "Git is already installed."
     else
@@ -69,7 +69,7 @@ fi
 
 # Get Git version in native system repository.
 GIT_VERSION=$(apt-cache show git | sed -n '/^Version/{s/\w\+:\s*//g p}' | \
-    head -n 1 | grep -o '^[0-9]\+\.[0-9]\+')
+    head -n 1 | grep --color=never -o '^[0-9]\+\.[0-9]\+')
 
 # Add APT repository with last stable version of git.
 if ! check_version "$GIT_VERSION"; then

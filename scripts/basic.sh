@@ -3,7 +3,7 @@
 
 function show_usage() {
     cat << EOF
-Usage: sudo $(basename $0) [OPTION]
+Usage: $(basename $0) [OPTION]
 Install essential command-line tools and utilits.
 Also scripts setup system timezone and locale.
 OPTION:
@@ -46,7 +46,7 @@ ADDRESS,IDENTIFICATION,MEASUREMENT,MONETARY,NAME,NUMERIC,PAPER,TELEPHONE}=$LCRU"
 echo "==> Do preparations."
 _eval "sudo apt-get update -qq"
 _eval "sudo apt-get install -qq software-properties-common build-essential pkg-config \
-automake libevent-dev"
+    automake libevent-dev"
 
 # Network tools.
 echo "==> Install network tools and applications."

@@ -4,7 +4,7 @@
 function show_usage() {
     cat << EOF
 Usage: $(basename $0) [OPTION]
-Install Google Chrome web browser.
+Install latest stable version Google Chrome web browser.
 OPTION:
     -D      Print commands, don't execute them.
     -h      Show this message.
@@ -19,7 +19,7 @@ function _eval() {
 }
 
 # Process arguments.
-while getopts ":hDu:g:" OPTION; do
+while getopts ":hD" OPTION; do
     case $OPTION in
         D) UBU_SETUP_DRY=1;;
         h) show_usage;;
@@ -43,9 +43,9 @@ grep -qi --include=*\.list -e "^deb .\+google.\+chrome" /etc/apt/sources.list /e
 if [ $? -ne 0 ]; then
     echo "==> Add Google Chrome APT repository."
     _eval "wget -qO - https://dl-ssl.google.com/linux/linux_signing_key.pub | \
-sudo apt-key add -"
-    _eval "echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ \
-stable main' | sudo tee --append /etc/apt/sources.list.d/google-chrome.list > /dev/null"
+        sudo apt-key add -"
+    _eval "echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' \
+        | sudo tee --append /etc/apt/sources.list.d/google-chrome.list > /dev/null"
     _eval "sudo apt-get update -qq"
 fi
 

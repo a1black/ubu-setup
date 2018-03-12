@@ -3,7 +3,7 @@
 
 function show_usage() {
     cat << EOF
-Usage: sudo $(basename $0) [OPTION]
+Usage: $(basename $0) [OPTION]
 Install terminal multiplexer Tmux.
 OPTION:
     -u      User who will recieve Tmux configuration files.
@@ -83,7 +83,7 @@ elif git --version > /dev/null 2>&1; then
         ncurses=libncurses5-dev
     fi
     _eval "sudo apt-get install -qq build-essential pkg-config \
-automake libevent-dev $ncurses"
+        automake libevent-dev $ncurses"
     tmux_tmp=$(mktemp -dq)
     _eval "git clone -q https://github.com/tmux/tmux.git $tmux_tmp"
     cd $tmux_tmp
@@ -123,7 +123,7 @@ _eval "mkdir -p /home/$cuser/.tmux"
 # Install Tmux plugin manager.
 if git --version > /dev/null 2>&1; then
     _eval "git clone -q --depth 1 https://github.com/tmux-plugins/tpm \
-/home/$cuser/.tmux/plugins/tpm"
+        /home/$cuser/.tmux/plugins/tpm"
 fi
 
 # Change owner of `.tmux` directory.

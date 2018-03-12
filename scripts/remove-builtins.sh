@@ -3,7 +3,7 @@
 
 function show_usage() {
     cat << EOF
-Usage: sudo $(basename $0) [OPTION]
+Usage: $(basename $0) [OPTION]
 Remove packages that comes pre-installed with Ubuntu OS.
 OPTION:
     -D      Print command, don't execute them.
@@ -46,7 +46,7 @@ _eval "sudo apt-get purge -qq rhythmbox rhythmbox-data totem"
 # Delete other garbage.
 echo "Remove the rest of pre-installed packages."
 _eval "sudo apt-get purge -qq xterm imagemagick deja-dup vim-tiny \
-shotwell shotwell-common transmission-common yelp*"
+    shotwell shotwell-common transmission-common yelp*"
 
 # Clean-up.
 _eval "sudo apt-get autoremove -qq"
