@@ -41,7 +41,7 @@ function py_version() {
 [ -n "$SUDO_USER" ] && cuser="$SUDO_USER" || cuser="$USER"
 
 # Process arguments.
-while getopts ":hDu:g:" OPTION; do
+while getopts ":hDu:" OPTION; do
     case $OPTION in
         u) cuser=$(id -nu "$OPTARG" 2> /dev/null);
             [ $? -ne 0 ] && _exit "Invalid user \"$OPTARG\".";;
@@ -76,8 +76,8 @@ fi
 
 # Install dependencies and powerline python module.
 echo "==> Install statusline plugin Powerline."
-#_eval "sudo apt-get install -yq libgit2-[0-9]"
-#_eval "sudo apt-get install -yq $pyv-pygit2"
+#_eval "sudo apt-get install -qq libgit2-[0-9]"
+#_eval "sudo apt-get install -qq $pyv-pygit2"
 _eval "sudo su - $cuser -c '$pyv -m pip install --user -qq psutil netifaces powerline-status powerline-gitstatus'"
 
 # Check if curl is installed
