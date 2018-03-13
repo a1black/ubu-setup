@@ -6,21 +6,14 @@ function show_usage() {
 Usage: $(basename $0) [OPTION]
 Install software for desktop Ubuntu.
 OPTION:
-    -D      Print commands, don't execute them.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _eval() {
-    echo "$1"; [ -z "$UBU_SETUP_DRY" ] && eval "$1";
-    return $?
-}
-
-while getopts ":hD" OPTION; do
+while getopts ":h" OPTION; do
     case $OPTION in
-        D) UBU_SETUP_DRY=1;;
         h) show_usage;;
     esac
 done
@@ -34,11 +27,12 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "==> Install audio and video player."
+sudo apt-get update -qq
 # Check if gnome desktop.
 dpkg -l 2> /dev/null | grep -qi "gnome-\?desktop"
-[ $? -eq 0 ] && _eval "sudo apt-get install -qq gnome-shell-extension-mediaplayer"
-_eval "sudo apt-get install -qq clementine vlc"
+[ $? -eq 0 ] && sudo apt-get install -qq gnome-shell-extension-mediaplayer
+sudo apt-get install -qq clementine vlc
 
 echo "==> Install rest of favourites."
-_eval "sudo apt-get install -qq qbittorrent"
+sudo apt-get install -qq qbittorrent
 #_eval "sudo apt-get install -qq --no-install-recommends meld"

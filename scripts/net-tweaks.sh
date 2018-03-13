@@ -6,22 +6,15 @@ function show_usage() {
 Usage: $(basename $0) [OPTION]
 Perform same checks on network interfaces.
 OPTION:
-    -D      Print commands, don't execute them.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _eval() {
-    echo "$1"; [ -z "$UBU_SETUP_DRY" ] && eval "$1";
-    return $?
-}
-
 # Process arguments.
-while getopts ":hD" OPTION; do
+while getopts ":h" OPTION; do
     case $OPTION in
-        D) UBU_SETUP_DRY=1;;
         h) show_usage;;
     esac
 done
@@ -52,9 +45,9 @@ if [ -z "$gateway" ]; then
     if [ $? -ne 0 ]; then
         echo "==> Ping to default gateway \`$gateway\` failed."
         echo "==> Disable DNSSEC."
-        _eval "sudo mkdir -p /etc/systemd/resolved.conf.d"
-        _eval "printf '[Resolve]\nDNSSEC=no\n' | \
-sudo tee /etc/systemd/resolved.conf.d/no-dnssec.conf > /dev/null"
+        sudo mkdir -p /etc/systemd/resolved.conf.d
+        printf '[Resolve]\nDNSSEC=no\n' | \
+            sudo tee /etc/systemd/resolved.conf.d/no-dnssec.conf > /dev/null
         echo "Reboot your system for changes to take effect."
         exit 1
     fi

@@ -7,18 +7,13 @@ Usage: $(basename $0) [OPTION]
 Install version control system Git.
 OPTION:
     -u      User who will recieve Git configuration files.
-    -g      Gitconfig download link.
-    -D      Print command, don't execute them.
+    -c      Download link for Git configuration file.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _eval() {
-    echo "$1"; [ -z "$UBU_SETUP_DRY" ] && eval "$1";
-    return $?
-}
 function _exit () {
     echo "Error: $1";
     echo "       Abort Git installation."
@@ -40,12 +35,11 @@ function check_version() {
 git_download="https://raw.githubusercontent.com/a1black/dotfiles/master/.gitconfig"
 
 # Process arguments.
-while getopts ":hDu:g:" OPTION; do
+while getopts ":hu:c:" OPTION; do
     case $OPTION in
         u) cuser=$(id -nu "$OPTARG" 2> /dev/null);
             [ $? -ne 0 ] && _exit "Invalid user \"$OPTARG\".";;
-        g) git_download="$OPTARG";;
-        D) UBU_SETUP_DRY=1;;
+        c) git_download="$OPTARG";;
         h) show_usage;;
     esac
 done
@@ -63,7 +57,7 @@ if [ $? -eq 0 ]; then
         _exit "Git is already installed."
     else
         echo "==> Delete old version of Git."
-        _eval "sudo apt-get purge -qq git"
+        sudo apt-get purge -qq git
     fi
 fi
 
@@ -74,12 +68,12 @@ GIT_VERSION=$(apt-cache show git | sed -n '/^Version/{s/\w\+:\s*//g p}' | \
 # Add APT repository with last stable version of git.
 if ! check_version "$GIT_VERSION"; then
     echo "==> Add Git Core PPA to apt source list."
-    _eval "sudo add-apt-repository -y ppa:git-core/ppa"
-    _eval "sudo apt-get update -qq"
+    sudo add-apt-repository -y ppa:git-core/ppa
+    sudo apt-get update -qq
 fi
 
 echo "==> Install Git."
-_eval "sudo apt-get install -qq git"
+sudo apt-get install -qq git
 
 # Download `.gitconfig` configuration file.
 gitconfig_file="/home/$cuser/.gitconfig"
@@ -87,15 +81,15 @@ if [[ ! -f "$gitconfig_file" ]]; then
     git_tmp=$(mktemp -q)
     echo "==> Download \`.gitconfig\` dotfile."
     if curl --version > /dev/null 2>&1; then
-        _eval "curl -fsLo $git_tmp $git_download"
+        curl -fsLo $git_tmp $git_download
     else
-        _eval "wget -qO - $git_download > $git_tmp"
+        wget -qO - $git_download > $git_tmp
     fi
     if [ $? -ne 0 ]; then
         echo "Fail to download \`.gitconfig\` file."
     else
-        _eval "cp -f $git_tmp $gitconfig_file"
-        _eval "chown $cuser:$(id -gn $cuser) $gitconfig_file"
+        cp -f $git_tmp $gitconfig_file
+        chown $cuser:$(id -gn $cuser) $gitconfig_file
     fi
     rm -f $git_tmp
 fi

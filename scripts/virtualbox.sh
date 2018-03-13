@@ -7,17 +7,12 @@ Usage: $(basename $0) [OPTION]
 Install latest available version of VirtualBox.
 OPTION:
     -p      Default path to store images of virtual machines.
-    -D      Print command, don't execute them.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _eval() {
-    echo "$1"; [ -z "$UBU_SETUP_DRY" ] && eval "$1";
-    return $?
-}
 function _exit () {
     echo "Error: $1";
     echo "       Abort VirtualBox installation."
@@ -25,10 +20,9 @@ function _exit () {
 }
 
 # Process arguments.
-while getopts ":hDp:" OPTION; do
+while getopts ":hp:" OPTION; do
     case $OPTION in
         p) vm_path="$OPTARG";;
-        D) UBU_SETUP_DRY=1;;
         h) show_usage;;
     esac
 done
@@ -45,7 +39,8 @@ sys_codename=$(lsb_release -c | cut -f 2)
 sys_release=$(lsb_release -r | cut -f 2)
 
 # Add Oracle VirtualBox APT repository to source list.
-grep -qi --include=*\.list -e "^deb .\+virtualbox" /etc/apt/sources.list /etc/apt/sources.list.d/*
+grep -qi --include=*\.list -e '^deb .\+virtualbox' \
+    /etc/apt/sources.list /etc/apt/sources.list.d/*
 if [ $? -ne 0 ]; then
     echo "==> Add Oracle VirtualBox APT repository."
     if [[ 16.04 > $sys_release ]]; then
@@ -53,10 +48,10 @@ if [ $? -ne 0 ]; then
     else
         key_uri="https://www.virtualbox.org/download/oracle_vbox_2016.asc"
     fi
-    _eval "wget -qO - $key_uri | sudo apt-key add -"
-    _eval "echo 'deb https://download.virtualbox.org/virtualbox/debian $sys_codename contrib' | \
-        sudo tee --append /etc/apt/sources.list.d/oracle-virtualbox.list > /dev/null"
-    _eval "sudo apt-get update -qq"
+    wget -qO - $key_uri | sudo apt-key add -
+    echo "deb https://download.virtualbox.org/virtualbox/debian $sys_codename contrib" \
+        | sudo tee /etc/apt/sources.list.d/oracle-virtualbox.list > /dev/null
+    sudo apt-get update -qq
 fi
 
 # Determine latest stable version of VirtualBox.
@@ -67,7 +62,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "==> Install VirtualBox package."
-_eval "sudo apt-get install -qq virtualbox-$install_ver"
+sudo apt-get install -qq virtualbox-$install_ver
 
 # Try to change default path for virtual machines.
 if [ -n "$vm_path" ]; then
@@ -81,6 +76,6 @@ if [ -n "$vm_path" ]; then
     elif [ ! -d "$vm_path" ]; then
         echo "Directory \"$vm_path\" does not exist."
     else
-        _eval "$vb_cmd $vb_config"
+        eval "$vb_cmd $vb_config"
     fi
 fi

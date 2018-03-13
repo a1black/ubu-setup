@@ -8,22 +8,13 @@ Clone dotfiles from git repository into ~/.dotfiles and
 create hard links to them in user home directory.
 OPTION:
     -u      User who will recieve dotfiles.
-    -g      HTTP link for cloning git repository.
-    -D      Print commands, don't execute them.
+    -c      HTTP link for cloning git repository.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _eval() {
-    if [ -z "$UBU_SETUP_DRY" ]; then
-        eval "$1"
-    else
-        echo "$1"
-    fi
-    return $?
-}
 function _exit () {
     echo "Error: $1";
     exit 1
@@ -45,12 +36,12 @@ function linkdot() {
                 echo "Error: Can't create directory \`$newdir\` to put dotfiles."
                 continue
             elif [ ! -d "$newdir" ]; then
-                _eval "mkdir -p $newdir"
-                _eval "chown $cuser:$cuser $newdir"
+                mkdir -p $newdir
+                chown $cuser:$cuser $newdir
             fi
             linkdot "$filename" "$newdir"
         elif [ -f "$filename" ]; then
-            _eval "ln -f $filename $2/$fname"
+            ln -f $filename $2/$fname
         fi
     done
 }
@@ -60,12 +51,11 @@ function linkdot() {
 dot_git="https://github.com/a1black/dotfiles.git"
 
 # Process arguments.
-while getopts ":hDu:g:" OPTION; do
+while getopts ":hu:c:" OPTION; do
     case $OPTION in
         u) cuser=$(id -nu "$OPTARG" 2> /dev/null);
             [ $? -ne 0 ] && _exit "Invalid user \"$OPTARG\".";;
-        g) dot_git="${OPTARG%%/}";;
-        D) UBU_SETUP_DRY=1;;
+        c) dot_git="${OPTARG%%/}";;
         h) show_usage;;
     esac
 done
@@ -104,7 +94,7 @@ elif [ -d "$dot_dir" ]; then
 fi
 
 # Clone dotfiles form repository.
-_eval "git clone -q $dot_git $dot_dir"
+git clone -q $dot_git $dot_dir
 if [ $? -ne 0 ]; then
     _exit "Fail clone dotfiles from \`$dot_git\`."
 fi

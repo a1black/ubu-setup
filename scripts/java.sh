@@ -4,24 +4,19 @@
 function show_usage() {
     cat << EOF
 Usage: $(basename $0) [OPTION]
-Install text editor Vim and plugin manager.
+Install Java Developement Kit.
 OPTION:
     -r      Version of installing JDK.
     -o      Install OpenJDK package if available (default false).
-    -D      Print commands, don't execute them.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _eval() {
-    echo "$1"; [ -z "$UBU_SETUP_DRY" ] && eval "$1";
-    return $?
-}
 function _exit () {
     echo "Error: $1";
-    echo "       Abort Vim installation."
+    echo "       Abort JDK installation."
     exit 1
 }
 
@@ -29,11 +24,10 @@ function _exit () {
 USE_OPENJDK=1
 
 # Process arguments.
-while getopts ":hDor:" OPTION; do
+while getopts ":hor:" OPTION; do
     case $OPTION in
         r) jdk_version="$OPTARG";;
         o) USE_OPENJDK=0;;
-        D) UBU_SETUP_DRY=1;;
         h) show_usage;;
     esac
 done
@@ -49,8 +43,8 @@ fi
 grep -qi --include=*\.list -e "^deb .\+webupd8team" /etc/apt/sources.list /etc/apt/sources.list.d/*
 if [ $? -ne 0 ]; then
     echo "==> Add unofficial Oracle JDK PPA to source list."
-    _eval "sudo add-apt-repository -y ppa:webupd8team/java"
-    _eval "sudo apt-get update -qq"
+    sudo add-apt-repository -y ppa:webupd8team/java
+    sudo apt-get update -qq
 fi
 
 # Check JDK version availability.
@@ -72,28 +66,29 @@ openjdk=$(dpkg -l openjdk-*-jre 2> /dev/null | sed -n '/^i/p' | \
 if [ $? -eq 0 ]; then
     echo "==> Remove OpenJDK and JRE."
     for jv in $openjdk; do
-        _eval "sudo apt-get purge -qq openjdk-${jv}-jdk openjdk-${jv}-jre"
+        sudo apt-get purge -qq openjdk-${jv}-jdk openjdk-${jv}-jre
     done
-    _eval "sudo apt-get autoremove -qq"
+    sudo apt-get autoremove -qq
 fi
 
 # Remove Oracle JDK packages.
 oraclejdk=$(dpkg -l oracle-java*-installer 2> /dev/null | sed -n '/^i/p' | \
     grep --color=never -oP '(?<=\soracle-java)\d+')
 if [ $? -eq 0 ]; then
+    echo "==> Remove Oracle JDK."
     for jv in $oraclejdk; do
-        _eval "sudo apt-get purge -qq oracle-java${jv}-installer"
+        sudo apt-get purge -qq oracle-java${jv}-installer
     done
-    _eval "sudo apt-get autoremove -qq"
+    sudo apt-get autoremove -qq
 fi
 
 # Install JDK.
 if [[ $openjdk_available -eq 0 && $USE_OPENJDK -eq 0 ]] || [[ $openjdk_available -eq 0 && $oracle_available -ne 0 ]]; then
     echo "==> Install OpenJDK $jdk_version package."
-    _eval "sudo apt-get install -qq openjdk-${jdk_version}-jdk"
+    sudo apt-get install -qq openjdk-${jdk_version}-jdk
 elif [ $oracle_available -eq 0 ]; then
     echo "==> Install Oracle JDK $jdk_version package."
-    _eval "sudo apt-get install -qq oracle-java${jdk_version}-installer"
+    sudo apt-get install -qq --force-yes oracle-java${jdk_version}-installer
 else
     _exit "Fail to locate requested version of JDK."
 fi

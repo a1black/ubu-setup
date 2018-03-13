@@ -7,17 +7,12 @@ Usage: $(basename $0) [OPTION]
 Install latest available version of provisioning tool Vagrant.
 OPTION:
     -r      Install specific version of Vagrant.
-    -D      Print command, don't execute them.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _eval() {
-    echo "$1"; [ -z "$UBU_SETUP_DRY" ] && eval "$1";
-    return $?
-}
 function _exit () {
     echo "Error: $1";
     echo "       Abort Vagrant installation."
@@ -25,10 +20,9 @@ function _exit () {
 }
 
 # Process arguments.
-while getopts ":hDr:" OPTION; do
+while getopts ":hr:" OPTION; do
     case $OPTION in
         r) install_ver="$OPTARG";;
-        D) UBU_SETUP_DRY=1;;
         h) show_usage;;
     esac
 done
@@ -50,7 +44,7 @@ VAG_VERSION=$(apt-cache show vagrant | sed -n '/^Version:/{s/\w\+:\s*//g p}' | \
 
 if [ "$install_ver" = "$VAG_VERSION" ]; then
     echo "==> Install Vagrant from native repository."
-    _eval "sudo apt-get install -qq vagrant"
+    sudo apt-get install -qq vagrant
     exit 0
 fi
 
@@ -83,12 +77,12 @@ function _cleanup() {
 vagrant_tmp=$(mktemp -dq)
 cd $vagrant_tmp
 echo "==> Download Vagrant $install_ver DEB package."
-_eval "wget -q $vagrant_url/$install_ver/$vagrant_deb"
+wget -q $vagrant_url/$install_ver/$vagrant_deb
 if [ $? -ne 0 ]; then
     _cleanup
     _exit "Fail download file \"$vagrant_deb\"."
 fi
-_eval "wget -q $vagrant_url/$install_ver/$vagrant_sums"
+wget -q $vagrant_url/$install_ver/$vagrant_sums
 if [ $? -ne 0 ]; then
     _cleanup
     _exit "Fail download file \"$vagrant_sums\"."
@@ -102,8 +96,8 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "==> Install Vagrant $install_ver package."
-_eval "sudo dpkg -i $vagrant_deb"
-_eval "sudo apt-get install -fqq"
+sudo dpkg -i $vagrant_deb
+sudo apt-get install -fqq
 
 # Clean-up.
 _cleanup
