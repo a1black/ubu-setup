@@ -6,18 +6,13 @@ function show_usage() {
 Usage: $(basename $0) [OPTION]
 Global installation of Universal Ctags package - active fork of Exuberant Ctags.
 OPTION:
-    -u      Install package locally.
-    -D      Print commands, don't execute them.
+    -u      Install locally for specified user.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _eval() {
-    echo "$1"; [ -z "$UBU_SETUP_DRY" ] && eval "$1";
-    return $?
-}
 function _exit () {
     echo "Error: $1";
     echo "       Abort Universal Ctags installation."
@@ -29,18 +24,18 @@ cuser='root'
 unctags_prex=''
 
 # Process arguments.
-while getopts ":hDu:" OPTION; do
+while getopts ":hu:" OPTION; do
     case $OPTION in
         u) cuser=$(id -nu "$OPTARG" 2> /dev/null);
             [ $? -ne 0 ] && _exit "Invalid user \"$OPTARG\".";;
-        D) UBU_SETUP_DRY=1;;
         h) show_usage;;
+        *) show_usage;;
     esac
 done
 
 # Check effective user privileges.
 if [[ $EUID -ne 0 && $cuser != $USER ]]; then
-    _exit "Run script with root privileges or provide user for local install."
+    _exit "Run script with root privileges or provide user for local installation."
 elif [[ $cuser != 'root' ]]; then
     unctags_location=/home/$cuser/.local
 else
@@ -63,18 +58,19 @@ fi
 # Build and install.
 echo "==> Build from source code."
 # Install dependencies.
-_eval "sudo apt-get install -qq build-essential pkg-config automake"
+sudo apt-get update -qq
+sudo apt-get install -qq build-essential pkg-config automake
 # Clone source code from github.
 unctags_tmp=$(mktemp -dq)
-_eval "git clone -q --depth 1 https://github.com/universal-ctags/ctags.git $unctags_tmp"
+git clone -q --depth 1 https://github.com/universal-ctags/ctags.git $unctags_tmp
 cd $unctags_tmp
 # Build and install.
-_eval "sh autogen.sh"
-_eval "./configure --prefix=$unctags_location --program-prefix=$unctags_prefix"
-_eval "make --quiet"
-_eval "make install"
+sh autogen.sh
+./configure --prefix=$unctags_location --program-prefix=$unctags_prefix
+make --quiet
+make install
 if [[ $cuser != 'root' ]]; then
-    _eval "chown $cuser:$(id -gn $cuser) $unctags_location/bin/${unctags_prefix}*tags"
+    chown $cuser:$(id -gn $cuser) $unctags_location/bin/${unctags_prefix}*tags
 fi
 
 # Clean-up.
