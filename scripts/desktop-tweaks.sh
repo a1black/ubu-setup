@@ -61,3 +61,13 @@ if gnome-shell-extension-tool -h > /dev/null 2>&1; then
         gnome-shell-extension-tool -d $extension
     done
 fi
+
+# Disable Bluetooth service.
+echo "==> Disable Blutooth Service."
+sudo systemctl stop bluetooth
+sudo systemctl disable bluetooth
+
+# Disable Whoopsie service.
+echo "==> Disable Whoopsie Service."
+sudo systemctl stop whoopsie
+sudo systemctl disable whoopsie
