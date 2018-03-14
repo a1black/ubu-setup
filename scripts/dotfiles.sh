@@ -27,7 +27,8 @@ function _exit () {
 #   $2  Respective path in home directory.
 function linkdot() {
     for filename in $1/* ; do
-        local fname="${filename##/*/}"
+#        local fname="${filename##/*/}"
+        local fname=$(basename "$filename")
         if [[ "$fname" = .git || "${fname,,}" = readme.md || "${fname^^}" = LICENSE ]] || [ ! -r "$filename" ]; then
             continue
         elif [ -d "$filename" ]; then

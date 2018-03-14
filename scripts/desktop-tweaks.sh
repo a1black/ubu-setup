@@ -7,6 +7,7 @@ Usage: $(basename $0) [OPTION]
 Perform same tweaks on desktop version of Ubuntu OS:
     * disable splash boot screen
     * disable MetaTracer service
+    * disable all Gnome extensions
 OPTION:
     -h      Show this message.
 
@@ -43,4 +44,20 @@ if which tracker > /dev/null 2>&1; then
     gsettings set org.freedesktop.Tracker.Miner.Files crawling-interval -2
     gsettings set org.freedesktop.Tracker.Miner.Files enable-monitors false
     tracker reset --hard
+fi
+
+# Disable Gnome shell extensions.
+if gnome-shell-extension-tool -h > /dev/null 2>&1; then
+    echo "==> Disable global Gnome shell extensions."
+    for filename in /usr/share/gnome-shell/extensions/*; do
+        [ ! -e "$filename" ] && continue
+        extension=$(basename ${filename%%@*})
+        gnome-shell-extension-tool -d $extension
+    done
+    echo "==> Disable local Gnome shell Extensions."
+    for filename in ~/.local/share/gnome-shell/extensions/*; do
+        [ ! -e "$filename" ] && continue
+        extension=$(basename ${filename%%@*})
+        gnome-shell-extension-tool -d $extension
+    done
 fi

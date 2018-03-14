@@ -80,7 +80,7 @@ if [ $tmux_native_install -eq 0 ]; then
 fi
 
 # Delete currently installed package.
-if tmux -V > /dev/null 2>&1; then
+if tmux -V > /dev/null 2>&1 || [ -x /home/$cuser/.local/bin/tmux ]; then
     echo "==> Delete currently installed package."
     sudo apt-get purge -qq tmux byobu
     if [[ "$cuser" != 'root' ]]; then
