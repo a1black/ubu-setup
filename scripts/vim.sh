@@ -6,7 +6,7 @@ function show_usage() {
 Usage: $(basename $0) [OPTION]
 Install text editor Vim and plugin manager.
 OPTION:
-    -u      User who will recieve Vim configuration files.
+    -u      Configure Vim for provided user (default current user).
     -c      Download link for Vim configuration file.
     -p      Vim plugin manager (plug, pathogen, vundle).
     -h      Show this message.

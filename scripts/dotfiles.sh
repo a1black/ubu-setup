@@ -7,7 +7,7 @@ Usage: $(basename $0) [OPTION]
 Clone dotfiles from git repository into ~/.dotfiles and
 create hard links to them in user home directory.
 OPTION:
-    -u      User who will recieve dotfiles.
+    -u      Copy dotfiles into \$HOME of provided user (default current user).
     -c      HTTP link for cloning git repository.
     -h      Show this message.
 

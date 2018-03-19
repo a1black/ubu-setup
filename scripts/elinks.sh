@@ -6,7 +6,7 @@ function show_usage() {
 Usage: $(basename $0) [OPTION]
 Install command-line browser Elinks.
 OPTION:
-    -u      User who will recieve Elinks configuration files.
+    -u      Configure Elinks for provided user (default current user).
     -c      Download link for Elinks configuration file.
     -h      Show this message.
 

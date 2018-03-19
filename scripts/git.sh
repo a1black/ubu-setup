@@ -6,7 +6,7 @@ function show_usage() {
 Usage: $(basename $0) [OPTION]
 Install version control system Git.
 OPTION:
-    -u      User who will recieve Git configuration files.
+    -u      Configure Git for provided user (default current user).
     -c      Download link for Git configuration file.
     -h      Show this message.
 
