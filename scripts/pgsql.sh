@@ -54,7 +54,6 @@ function find_bin_postgres() {
 
 # Default values.
 [ -n "$SUDO_USER" ] && cuser="$SUDO_USER" || cuser="$USER"
-UBU_SETUP_DRY=1
 
 # Process arguments.
 while getopts ":hr:" OPTION; do
@@ -71,22 +70,18 @@ if [ -n "$psql_version" ]; then
 
     # Check if Postgres is already installed.
     psql_bin=$(find_bin_postgres "$psql_version")
-    if [ $? -eq 0 ]; then
-        _exit "PostgreSQL is already installed."
-    fi
+    [ $? -eq 0 ] && _exit "PostgreSQL is already installed."
 fi
 
 # Add PostgreSQL APT repository.
-repos_url=http://apt.postgresql.org/pub/repos/apt
-repos_dist=$(codename)-pgdg
-
-grep -qi --include=*\.list -e "^deb .\+postgresql.\+ $repos_dist" \
+grep -qi --include=*\.list -e "^deb .\+apt\.postgresql" \
     /etc/apt/sources.list /etc/apt/sources.list.d/*
 if [ $? -ne 0 ]; then
+    repos_url=http://apt.postgresql.org/pub/repos/apt
+    repos_dist=$(codename)-pgdg
+
     wget -q --spider --timeout=2 --tries=2 $repos_url/dists/$repos_dist > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        _exit "Can't add APT repository for Ubuntu $(lsb_release -sc)"
-    fi
+    [ $? -ne 0 ] && _exit "Can't add APT repository for Ubuntu $(codename)"
     echo "==> Add PostgreSQL APT repository."
     wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
     echo "deb $repos_url $repos_dist main" | \
@@ -101,7 +96,7 @@ if [ -n "$psql_version" ]; then
 fi
 
 # Install and configure Postgres.
-echo "==> Installing PostgreSQL"
+echo "==> Installing PostgreSQL."
 if [ -z "$psql_version" ]; then
     sudo apt-get install -qq postgresql postgresql-contrib
 else
@@ -130,7 +125,7 @@ if [ -z "$psql_version" ]; then
 fi
 echo "==> Configure PostgreSQL $psql_version"
 # Listen across different networks.
-sudo sed -i -e '/^#listen_addresses/s/localhost/*/' -e '/^#listen_addresses/s/#//' \
+sudo sed -i.orig "s/^#\?\(listen_addresses\) = '.\+'/\1 = '*'/" \
     /etc/postgresql/$psql_version/main/postgresql.conf
 
 # Change the authentication method from peer to md5.
