@@ -29,7 +29,6 @@ while getopts ":hu:" OPTION; do
         u) cuser=$(id -nu "$OPTARG" 2> /dev/null);
             [ $? -ne 0 ] && _exit "Invalid user \"$OPTARG\".";;
         h) show_usage;;
-        *) show_usage;;
     esac
 done
 
@@ -42,10 +41,10 @@ else
     unctags_location=/usr/local
 fi
 
-# Check if Universal Ctags is already installed.
-ctags --version > /dev/null 2>&1
+# Check if any other Ctags packages is installed.
+ctags_current=$(sudo -iH -u $cuser ctags --version 2> /dev/null)
 if [ $? -eq 0 ]; then
-    ctags --version | grep -qi 'Universal Ctags'
+    echo -e "$ctags_current" | grep -qi 'Universal Ctags'
     [ $? -ne 0 ] && unctags_prefix='ex'
 fi
 
@@ -56,6 +55,11 @@ if ! git --version > /dev/null 2>&1; then
 fi
 
 # Build and install.
+if [ ! -d "$unctags_location" ]; then
+    mkdir -p $unctags_location 2> /dev/null
+    [ $? -ne 0 ] && _exit "Fail to create directory for hosting Universal Ctags binary."
+    chown $cuser:$(id -gn $cuser) $unctags_location
+fi
 echo "==> Build from source code."
 # Install dependencies.
 sudo apt-get update -qq
