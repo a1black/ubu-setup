@@ -39,11 +39,11 @@ ADDRESS,IDENTIFICATION,MEASUREMENT,MONETARY,NAME,NUMERIC,PAPER,TELEPHONE}=$LCRU
 echo "==> Do preparations."
 sudo apt-get update -qq
 sudo apt-get install -qq software-properties-common build-essential pkg-config \
-    automake libevent-dev
+    automake python-setuptools libevent-dev ca-certificates lsb-release
 
 # Network tools.
 echo "==> Install network tools and applications."
-sudo apt-get install -qq net-tools traceroute nmap curl nfs-common ncftp
+sudo apt-get install -qq net-tools traceroute nmap wget curl nfs-common ncftp
 
 # Usefull packages.
 echo "==> Install other usefull packages."

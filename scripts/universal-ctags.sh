@@ -5,6 +5,7 @@ function show_usage() {
     cat << EOF
 Usage: $(basename $0) [OPTION]
 Global installation of Universal Ctags package - active fork of Exuberant Ctags.
+If system already has Ctags program, Universal Ctags will be installed as 'exctags'.
 OPTION:
     -u      Install locally for specified user.
     -h      Show this message.
