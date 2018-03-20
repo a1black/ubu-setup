@@ -9,6 +9,7 @@ OPTION:
     -u      Install locally for specified user.
     -c      Download link for tmux configuration file.
     -n      Install from system native repository.
+    -d      Delete Tmux if installed.
     -h      Show this message.
 
 EOF
@@ -38,30 +39,47 @@ function delete_bin() {
     return $?
 }
 
+# Uninstall Tmux from the system.
+# Args:
+#   $1 - Delete locaty installed package.
+function uninstall_tmux() {
+    echo "==> Delete currently installed package."
+    if [ "$1" = 'root' ]; then
+        sudo apt-get purge -qq tmux byobu
+        delete_bin "/usr /home"
+    else
+        delete_bin "/home/$1"
+    fi
+}
+
 # Default values.
 cuser='root'
 tmux_native_install=1
+tmux_uninstall=1
 tmux_download="https://raw.githubusercontent.com/a1black/dotfiles/master/.tmux.conf"
 
 # Process arguments.
-while getopts ":hnu:c:" OPTION; do
+while getopts ":hndu:c:" OPTION; do
     case $OPTION in
         u) cuser=$(id -nu "$OPTARG" 2> /dev/null);
             [ $? -ne 0 ] && _exit "Invalid user \"$OPTARG\".";;
         c) tmux_download="$OPTARG";;
         n) tmux_native_install=0;;
+        d) tmux_uninstall=0;;
         h) show_usage;;
-        *) show_usage;;
     esac
 done
 
-# Check effective user privileges.
-if [[ $EUID -ne 0 && $cuser != $USER ]]; then
-    _exit "Run script with root privileges or provide user for installing tmux locally."
-elif [[ $cuser != 'root' ]]; then
-    tmux_location=/home/$cuser/.local
-else
-    tmux_location=/usr/local
+if [[ $EUID -ne 0 && "$cuser" = 'root' ]]; then
+    cuser=$USER
+fi
+[ "$cuser" = 'root' ] && tmux_location=/usr/local || tmux_location=/home/$cuser/.local
+
+# Check arguments.
+if [[ $tmux_uninstall -eq 0 && $tmux_native_install -eq 0 ]]; then
+    _exit "Ambiguous use of script options."
+elif [[ $EUID -ne 0 && $cuser != $USER ]]; then
+    _exit "Run script with root privileges or provide user to run locally."
 fi
 
 # Get currently installed Tmux version.
@@ -80,26 +98,24 @@ if [ $tmux_native_install -eq 0 ]; then
 fi
 
 # Delete currently installed package.
-if tmux -V > /dev/null 2>&1 || [ -x /home/$cuser/.local/bin/tmux ]; then
-    echo "==> Delete currently installed package."
-    sudo apt-get purge -qq tmux byobu
-    if [[ "$cuser" != 'root' ]]; then
-        delete_bin "/home/$cuser"
-    else
-        delete_bin "/usr /home"
-    fi
-fi
+uninstall_tmux "$cuser"
+[ $tmux_uninstall -eq 0 ] && exit 0
 
 # Install Tmux from system APT repository.
 if [ $tmux_native_install -eq 0 ]; then
     echo "==> Install Tmux from system APT repository."
     sudo apt-get install -qq tmux
 elif git --version > /dev/null 2>&1; then
-    echo "==> Build Tmux from source code."
+    if [ ! -d "$tmux_location" ]; then
+        mkdir -p $tmux_location 2> /dev/null
+        [ $? -ne 0 ] && _exit "Fail to create directory for hosting Tmux binary."
+        chown $cuser:$(id -gn $cuser) $tmux_location
+    fi
     # Install dependencies.
+    echo "==> Build Tmux from source code."
     sudo apt-get update -qq
-    ncurses=libncurses5
-    apt-cache show libncurses6 > /dev/null 2>&1 && ncurses=libncurses6
+    ncurses=libncurses5-dev
+    apt-cache show libncurses6 > /dev/null 2>&1 && ncurses=libncurses6-dev
     sudo apt-get install -qq build-essential pkg-config automake libevent-dev "$ncurses"
     # Clone source code from github.
     tmux_tmp=$(mktemp -dq)
@@ -127,14 +143,14 @@ fi
 
 # Download Tmux configuration file.
 tmux_conf="/home/$cuser/.tmux.conf"
-if [[ "$cuser" != 'root' && ! -f "$tmux_conf" ]]; then
+if [[ "$cuser" != 'root' && ! -f "$tmux_conf" && -n "$tmux_download" ]]; then
     echo "==> Download \`.tmux.conf\` configuration file."
     tmux_tmp=$(mktemp -q)
     wget -qO - $tmux_download > $tmux_tmp
     if [ $? -ne 0 ]; then
         echo "Fail to download \`.tmux.conf\` file."
     else
-        cp -f $tmux_tmp $tmux_conf
+        mv -f $tmux_tmp $tmux_conf
         chown $cuser:$(id -gn $cuser) $tmux_conf
     fi
     rm -f $tmux_tmp
