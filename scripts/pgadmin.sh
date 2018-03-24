@@ -6,25 +6,24 @@ function show_usage() {
 Usage: $(basename $0) [OPTION]
 Install pgAdmin as a standalone desktop application.
 OPTION:
-    -r      Install 3 or 4 version of pgAdmin.
+    -r      Install 3 (default) or 4 version of pgAdmin.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _exit () {
-    echo "Error: $1";
-    echo "       Abort pgAdmin installation."
-    exit 1
+function _exit() {
+    echo "Error: $1"
+    echo '       Abort pgAdmin installation.'
+    exit ${2:-1}
 }
 
 # Get Ubuntu code name.
 function codename() {
-    local name=$(lsb_release -sc)
-    [ $name = 'artful' ] && name=xenial
+    local name=$(lsb_release -sc 2> /dev/null)
+    [[ -z "$name" || "$name" = 'artful' ]] && name=xenial
     echo "$name"
-    return 0
 }
 
 # Default values.
@@ -34,24 +33,30 @@ pgadmin_version=3
 while getopts ":hr:" OPTION; do
     case $OPTION in
         r) pgadmin_version="$OPTARG";;
-        h) show_usage;;
+        *) show_usage;;
     esac
 done
 
+# Check privileges.
+[ $UID -ne 0 ] && _exit 'Run script with root privileges.' 126
 # Check version number.
-[[ "$pgadmin_version" =~ ^[34]$ ]] || _exit "Invalid pgAdmin version number."
+[[ "$pgadmin_version" =~ ^[34]$ ]] || _exit 'Invalid pgAdmin version number.' 2
+# Check if system has GUI layer.
+dpkg -l 2> /dev/null | grep -q 'xserver-xorg\s'
+[ $? -ne 0 ] && _exit 'Operating system does not have graphical component.' 126
 
 # Add PostgreSQL APT repository.
-grep -qi --include=*\.list -e "^deb .\+apt\.postgresql" \
+grep -qi --include=*\.list -e '^deb .\+apt\.postgresql' \
     /etc/apt/sources.list /etc/apt/sources.list.d/*
 if [ $? -ne 0 ]; then
+    echo '==> Add Postgres APT repository to source list.'
     repos_url=http://apt.postgresql.org/pub/repos/apt
     repos_dist=$(codename)-pgdg
 
     wget -q --spider --timeout=2 --tries=2 $repos_url/dists/$repos_dist > /dev/null 2>&1
-    [ $? -ne 0 ] && _exit "Can't add PostreSQL APT repository for Ubuntu $(codename)"
-    echo "==> Add PostgreSQL APT repository."
+    [ $? -ne 0 ] && _exit "Can't add APT repository for Ubuntu $(codename)"
     wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+    [ $? -ne 0 ] && _exit 'Fail to add key for Postgres repository.'
     echo "deb $repos_url $repos_dist main" | \
         sudo tee /etc/apt/sources.list.d/postgresql.list > /dev/null
     sudo apt-get update -qq

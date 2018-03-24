@@ -4,80 +4,104 @@
 function show_usage() {
     cat << EOF
 Usage: $(basename $0) [OPTION]
-Global installation of Universal Ctags package - active fork of Exuberant Ctags.
+Install Universal Ctags package - active fork of Exuberant Ctags.
 If system already has Ctags program, Universal Ctags will be installed as 'exctags'.
 OPTION:
-    -u      Install locally for specified user.
+    -l      Install locally for current user.
     -h      Show this message.
 
 EOF
     exit 1
 }
 
-function _exit () {
-    echo "Error: $1";
-    echo "       Abort Universal Ctags installation."
-    exit 1
+function _exit() {
+    echo "Error: $1"
+    echo '       Abort Universal Ctags installation.'
+    exit ${2:-1}
+}
+
+# Execute command.
+# Args:
+#   $1  Run as user.
+#   $2  Command.
+function _eval() {
+    if [ $UID -eq 0 ]; then
+        sudo -iH -u $1 bash -c "$2"
+    else
+        bash -c "$2"
+    fi
+}
+
+# Create directory.
+# Args:
+#   $1  User name.
+#   $2  Path.
+function _mkdir() {
+    _eval $1 "mkdir -p $2 2> /dev/null"
+    [ $? -ne 0 ] && return 1
+    chown -R $1:$(id -gn $1) $2 2> /dev/null
 }
 
 # Default values.
-cuser='root'
+[ -n "$SUDO_USER" ] && cuser=$SUDO_USER || cuser=$USER
+unctags_local=1
 unctags_prex=''
 
 # Process arguments.
-while getopts ":hu:" OPTION; do
+while getopts ":hl" OPTION; do
     case $OPTION in
-        u) cuser=$(id -nu "$OPTARG" 2> /dev/null);
-            [ $? -ne 0 ] && _exit "Invalid user \"$OPTARG\".";;
-        h) show_usage;;
+        l) unctags_local=0;;
+        *) show_usage;;
     esac
 done
 
-# Check effective user privileges.
-if [[ $EUID -ne 0 && $cuser != $USER ]]; then
-    _exit "Run script with root privileges or provide user for local installation."
-elif [[ $cuser != 'root' ]]; then
-    unctags_location=/home/$cuser/.local
-else
-    unctags_location=/usr/local
-fi
+# Check privileges.
+[ $UID -ne 0 ] && _exit 'Run script with root privileges.' 126
+[[ $unctags_local -eq 0 && $cuser = 'root' ]] && _exit 'Can not install for root user.' 126
+# Check required software.
+git --version > /dev/null 2>&1 || _exit 'Git is not available.' 127
+
+# Determine path for placing Universal Ctags binaries.
+unctags_location=/usr/local
+[ $unctags_local -eq 0 ] && unctags_location=/home/$cuser/.local
 
 # Check if any other Ctags packages is installed.
-ctags_current=$(sudo -iH -u $cuser ctags --version 2> /dev/null)
-if [ $? -eq 0 ]; then
+ctags_current=$(_eval $cuser 'ctags --version 2> /dev/null')
+if [ -n "$ctags_current" ]; then
     echo -e "$ctags_current" | grep -qi 'Universal Ctags'
     [ $? -ne 0 ] && unctags_prefix='ex'
 fi
 
-# Check if Git is installed.
-git --version > /dev/null 2>&1
-if ! git --version > /dev/null 2>&1; then
-    _exit "Git is required to install Universal-ctags."
+# Create all required directories.
+if [ $unctags_local -eq 0 ]; then
+    _mkdir $cuser $unctags_location/bin || _exit 'Fail to create directory for Universal Ctags binaries.'
+    _mkdir $cuser $unctags_location/share/man/man1
 fi
 
-# Build and install.
-if [ ! -d "$unctags_location" ]; then
-    mkdir -p $unctags_location 2> /dev/null
-    [ $? -ne 0 ] && _exit "Fail to create directory for hosting Universal Ctags binary."
-    chown $cuser:$(id -gn $cuser) $unctags_location
-fi
-echo "==> Build from source code."
-# Install dependencies.
+# Install Universal Ctags.
+echo '==> Install dependencies.'
 sudo apt-get update -qq
 sudo apt-get install -qq build-essential pkg-config automake
-# Clone source code from github.
+
+# Download source code.
+echo '==> Download source code.'
 unctags_tmp=$(mktemp -dq)
-git clone -q --depth 1 https://github.com/universal-ctags/ctags.git $unctags_tmp
-cd $unctags_tmp
+git clone -q --depth 1 https://github.com/universal-ctags/ctags.git $unctags_tmp 2> /dev/null
+[ $? -ne 0 ] && _exit 'Fail to download Universal Ctags source code.'
+cd $unctags_tmp > /dev/null
+
 # Build and install.
+echo '==> Build binaries from source code.'
 sh autogen.sh
 ./configure --prefix=$unctags_location --program-prefix=$unctags_prefix
 make --quiet
 make install
-if [[ $cuser != 'root' ]]; then
+if [ $unctags_local -eq 0 ]; then
     chown $cuser:$(id -gn $cuser) $unctags_location/bin/${unctags_prefix}*tags
 fi
 
 # Clean-up.
 cd - > /dev/null
 rm -rf $unctags_tmp
+
+echo "Universal Ctags available as: $unctags_location/bin/${unctags_prefix}ctags"

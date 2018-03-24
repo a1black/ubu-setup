@@ -14,32 +14,40 @@ EOF
 
 while getopts ":h" OPTION; do
     case $OPTION in
-        h) show_usage;;
+        *) show_usage;;
     esac
 done
 
+# Check privileges.
+if [ $UID -ne 0 ]; then
+    echo 'Error: Run script with root privileges.'
+    echo '       Abort removing pre-installed packages.'
+    exit 126
+fi
+
 # Remove Gnome pre-installed applications.
-echo "==> Remove Gnome pre-installed packages."
+echo '==> Remove pre-installed Gnome packages.'
 declare -a pkg_list=('audio' 'blog' 'calculator' 'calendar' 'dictionary' \
     'documents' 'games' 'games-app' 'gmail' 'chess' 'hearts' 'mahjongg' \
     'maps' 'mines' 'music' 'photos' 'recipes' 'sound-recorder' \
     'sudoku' 'todo' 'translate' 'weather')
 pkg_str=$(printf ",%s" "${pkg_list[@]}")
-eval "sudo apt-get purge -qq gnome-{${pkg_str:1}}"
+bash -c "sudo apt-get purge -qq gnome-{${pkg_str:1}}"
 unset pkg_list pkg_str
 
-# Remove Mozilla software.
-echo "==> Remove Mozilla applications."
-sudo apt-get purge -qq firefox thunderbird
+# Remove Mozilla software and other web applications.
+echo '==> Remove Web applications.'
+sudo apt-get purge -qq firefox thunderbird chromium
 
 # Delete pre-installed media applications.
-echo "==> Remove default media applications."
+echo '==> Remove default media applications.'
 sudo apt-get purge -qq rhythmbox rhythmbox-data totem
 
 # Delete other garbage.
-echo "Remove the rest of pre-installed packages."
+echo '==> Remove the rest of pre-installed packages.'
 sudo apt-get purge -qq xterm imagemagick deja-dup vim-tiny \
     shotwell shotwell-common transmission-common yelp*
 
 # Clean-up.
+echo '==> Remove unneeded dependencies.'
 sudo apt-get autoremove -qq
