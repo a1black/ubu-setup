@@ -181,6 +181,7 @@ if [ $tmux_do_local -eq 0 ]; then
     _mkdir $cuser $tmux_location/share/man/man1
 fi
 
+echo '==> Install Tmux from source code.'
 # Install tools for building Tmux from source code.
 echo '==> Install dependencies.'
 sudo apt-get update -qq

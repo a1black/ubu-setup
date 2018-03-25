@@ -65,5 +65,6 @@ fi
 # Install pgAdmin.
 apt-cache show "pgadmin$pgadmin_version" 2> /dev/null | grep -q '^Version:'
 [ $? -ne 0 ] && _exit "Can't locate pgAdmin$pgadmin_version in repository."
+echo "==> Install pgAdmin$pgadmin_version"
 sudo apt-get install -qq pgadmin$pgadmin_version 2> /dev/null
 [ $? -ne 0 ] && _exit "Fail to install pgAdmin$pgadmin_version"

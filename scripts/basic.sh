@@ -57,8 +57,10 @@ sudo apt-get update -qq
 sudo apt-get install -qq software-properties-common build-essential pkg-config \
     automake libevent-dev ca-certificates lsb-release libncurses5-dev
 
-# Python packages.
-sudo apt-get install -qq python-dev python3-dev python-setuptools python-pip python3-pip
+# Python 2 packages.
+sudo apt-get install -qq python-dev python-pip python-setuptools
+# Python 3 packages.
+sudo apt-get install -qq python3-dev python3-pip python3-setuptools python3-virtualenv
 
 # Network tools.
 echo '==> Install network tools and applications.'

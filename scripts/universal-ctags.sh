@@ -78,7 +78,7 @@ if [ $unctags_local -eq 0 ]; then
     _mkdir $cuser $unctags_location/share/man/man1
 fi
 
-# Install Universal Ctags.
+echo '==> Install Universal Ctags from source code.'
 echo '==> Install dependencies.'
 sudo apt-get update -qq
 sudo apt-get install -qq build-essential pkg-config automake

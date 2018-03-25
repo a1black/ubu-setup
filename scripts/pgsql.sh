@@ -107,12 +107,11 @@ sudo service postgresql start 2> /dev/null
 # Configure PostgeSQL installed from virtual package.
 [ -n "$SUDO_USER" ] && cuser="$SUDO_USER" || cuser="$USER"
 
-# Setup passwords.
-if [[ $cuser != 'root' && -z "$psql_version" ]]; then
-    # Change default password for user 'postgres'.
-    echo '==> Changre default Postgres password.'
-    sudo -u postgres psql -d postgres -c '\password postgres'
+# Change default password for user 'postgres'.
+echo '==> Changre default Postgres password.'
+sudo -u postgres psql -d postgres -c '\password postgres'
 
+if [ $cuser != 'root' ]; then
     # Create new super user.
     echo "==> Create new superuser '$cuser'."
     sudo -u postgres createuser --superuser $cuser

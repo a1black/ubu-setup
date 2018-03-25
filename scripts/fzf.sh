@@ -89,7 +89,7 @@ fi
 # Check for required software.
 ! git --version > /dev/null 2>&1 && _exit 'Git is not available.' 127
 
-# Install fzf.
+echo '==> Install fzf.'
 echo '==> Create all required directories.'
 _mkdir $cuser $bin_location || _exit 'Fail to create directory for fzf binaries.'
 _mkdir $cuser $fzf_location || _exit 'Fail to create directory for cloning fzf.'
@@ -103,7 +103,6 @@ if [ $? -ne 0 ]; then
 fi
 _chown -R $cuser $fzf_location
 
-echo '==> Install fzf.'
 _eval $cuser "cd $fzf_location && bash -- install --no-update-rc --completion --key-bindings"
 
 # Create symlinks for fzf binaries.

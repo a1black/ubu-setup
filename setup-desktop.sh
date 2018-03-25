@@ -28,14 +28,14 @@ set_timezone=Europe/Moscow
 git_dotfiles=https://github.com/a1black/dotfiles.git
 vim_plug=plug
 
-vbox=on
+vbox_enable=on
 vagrant_enable=on
 
 java_version=8
 php_version=hhvm
 
 sqlite_enable=on
-mysql_enable=on
+mysql_version=5.6
 pgsql_version=10
 pgadmin_version=3
 
@@ -63,7 +63,7 @@ bash -- "$current_path/scripts/basic.sh" -t $set_timezone || exit 1
 bash -- "$current_path/scripts/git.sh"
 
 # Customization.
-bash -- "$current_path/scripts/dotfiles.sh" -u $cuser -c $git_dotfiles
+bash -- "$current_path/scripts/dotfiles.sh" -u $current_user -c $git_dotfiles
 bash -- "$current_path/scripts/powerline.sh"
 
 # Command line tools.
@@ -83,7 +83,7 @@ fi
 
 # Install database managers.
 [ "$sqlite_enable" = 'on' ] && bash -- "$current_path/scripts/sqlite.sh"
-[ "$mysql_enable" = 'on' ] && bash -- "$current_path/scripts/mysql.sh"
+[ -n "$mysql_version" ] && bash -- "$current_path/scripts/mysql.sh" -r $mysql_version
 [ -n "$pgsql_version" ] && bash -- "$current_path/scripts/pgsql.sh" -r $pgsql_version
 
 # HTTP server.
@@ -97,3 +97,6 @@ bash -- "$current_path/scripts/nginx.sh" -u $current_user
 bash -- "$current_path/scripts/chrome.sh"
 bash -- "$current_path/scripts/favourite-gui-apps.sh"
 [ -n "$pgadmin_version" ] && bash -- "$current_path/scripts/pgadmin.sh" -r $pgadmin_version
+
+# Clean-up.
+rm -rf /home/$current_user/{.composer,.hhvm.hhbc,.wget-hsts}
