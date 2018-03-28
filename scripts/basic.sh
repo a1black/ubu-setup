@@ -60,7 +60,7 @@ sudo apt-get install -qq software-properties-common build-essential pkg-config \
 # Python 2 packages.
 sudo apt-get install -qq python-dev python-pip python-setuptools
 # Python 3 packages.
-sudo apt-get install -qq python3-dev python3-pip python3-setuptools python3-virtualenv
+sudo apt-get install -qq python3-dev python3-pip python3-setuptools
 
 # Network tools.
 echo '==> Install network tools and applications.'

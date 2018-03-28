@@ -65,7 +65,7 @@ function install_update_powerline() {
         upgrade_flag=$1
         shift
     fi
-    _eval $1 "python$2 -m pip install -qq $upgrade_flag psutil netifaces powerline-status powerline-gitstatus"
+    _eval $1 "python$2 -m pip install --user -qq $upgrade_flag psutil netifaces powerline-status powerline-gitstatus"
 }
 
 # Create symbol link to directory that contains plugins to bash/tmux/etc.
