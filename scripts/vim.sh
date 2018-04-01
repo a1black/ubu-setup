@@ -9,6 +9,7 @@ OPTION:
     -u      Configure Vim for provided user (default current user).
     -c      Download link for Vim configuration file.
     -p      Vim plugin manager (plug, pathogen, vundle).
+    -f      Force removal of an old version of Vim.
     -h      Show this message.
 
 EOF
@@ -46,7 +47,7 @@ function check_vim_version() {
 function configure_vim() {
     [[ -z "$1" || "$1" = 'root' ]] && return 1
     # Directories needed for Vim.
-    mkdir -p /home/$1/.vim/{autoload,backups,session,swap,undo} 2> /dev/null
+    mkdir -p /home/$1/.vim/{autoload,backups,session,swaps,undo} 2> /dev/null
     [ $? -ne 0 ] && return 1
     # Change owner of download data.
     _chown -R $1 /home/$1/.vim
@@ -107,12 +108,13 @@ function install_plugin_manager() {
 #vimrc_download=https://raw.githubusercontent.com/a1black/dotfiles/master/.vimrc
 
 # Process arguments.
-while getopts ":hu:c:p:" OPTION; do
+while getopts ":hfu:c:p:" OPTION; do
     case $OPTION in
         u) cuser=$(id -nu "$OPTARG" 2> /dev/null);
             [ $? -ne 0 ] && _exit "Invalid user '$OPTARG'.";;
         c) vimrc_download="$OPTARG";;
         p) vim_plug="${OPTARG,,}";;
+        f) vim_force_remove=0;;
         *) show_usage;;
     esac
 done
@@ -128,14 +130,15 @@ done
 current_major_ver=$(vim --version 2> /dev/null | head -n 1 | \
     grep --color=never -oP '(?<=IMproved )\d+')
 if [ $? -eq 0 ]; then
-    if check_vim_version "$current_major_ver"; then
+    check_vim_version "$current_major_ver"
+    if [[ $? -ne 0 && -n "$vim_force_remove" ]]; then
+        echo '==> Delete older version of Vim.'
+        sudo apt-get purge -qq vim vim-common vim-runtime vim-tiny
+    else
         configure_vim $cuser
         download_config $cuser $vimrc_download
         install_plugin_manager $cuser $vim_plug
         _exit 'Vim is already installed.'
-    else
-        echo '==> Delete older version of Vim.'
-        sudo apt-get purge -qq vim vim-common vim-runtime vim-tiny
     fi
 fi
 

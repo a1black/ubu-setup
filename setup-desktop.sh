@@ -28,15 +28,12 @@ set_timezone=Europe/Moscow
 git_dotfiles=https://github.com/a1black/dotfiles.git
 vim_plug=plug
 
-vbox_enable=on
-vagrant_enable=on
-
-java_version=8
-php_version=hhvm
-
-sqlite_enable=on
-mysql_version=5.6
-pgsql_version=10
+powerline_enable=1
+brew_enable=1
+vbox_enable=1
+vagrant_enable=1
+#java_version=8
+php_enable=1
 pgadmin_version=3
 
 # Check privileges.
@@ -64,34 +61,27 @@ bash -- "$current_path/scripts/git.sh"
 
 # Customization.
 bash -- "$current_path/scripts/dotfiles.sh" -u $current_user -c $git_dotfiles
-bash -- "$current_path/scripts/powerline.sh"
+[ "$powerline_enable" = '1' ] && bash -- "$current_path/scripts/powerline.sh"
 
 # Command line tools.
-bash -- "$current_path/scripts/vim.sh" -u $current_user -p $vim_plug
+bash -- "$current_path/scripts/vim.sh" -u $current_user -p $vim_plug -f
 bash -- "$current_path/scripts/tmux.sh" -l
 bash -- "$current_path/scripts/fzf.sh"
 bash -- "$current_path/scripts/universal-ctags.sh" -l
 bash -- "$current_path/scripts/elinks.sh"
-bash -- "$current_path/scripts/linuxbrew.sh"
+[ "$brew_enable" = 1 ] && bash -- "$current_path/scripts/linuxbrew.sh"
 
 # Install program language complires and interpretators.
 [ -n "$java_version" ] && bash -- "$current_path/scripts/java.sh" -r $java_version
-if [ -n "$php_version" ]; then
-    bash -- "$current_path/scripts/php.sh" -r $php_version
+if [ "$php_enable" = 1 ]; then
+    bash -- "$current_path/scripts/php.sh" -f
     bash -- "$current_path/scripts/composer.sh"
+    bash -- "$current_path/scripts/phpctags.sh" -l
 fi
 
-# Install database managers.
-[ "$sqlite_enable" = 'on' ] && bash -- "$current_path/scripts/sqlite.sh"
-[ -n "$mysql_version" ] && bash -- "$current_path/scripts/mysql.sh" -r $mysql_version
-[ -n "$pgsql_version" ] && bash -- "$current_path/scripts/pgsql.sh" -r $pgsql_version
-
-# HTTP server.
-bash -- "$current_path/scripts/nginx.sh" -u $current_user
-
 # Virtualization.
-[ "$vbox_enable" = 'on' ] && bash -- "$current_path/scripts/virtualbox.sh"
-[ "$vagrant_enable" = 'on' ] && bash -- "$current_path/scripts/vagrant.sh"
+[ "$vbox_enable" = 1 ] && bash -- "$current_path/scripts/virtualbox.sh"
+[ "$vagrant_enable" = 1 ] && bash -- "$current_path/scripts/vagrant.sh"
 
 # GUI software.
 bash -- "$current_path/scripts/chrome.sh"

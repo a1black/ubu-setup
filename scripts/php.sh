@@ -6,6 +6,7 @@ function show_usage() {
 Usage: $(basename $0) [OPTION]
 Install PHP or HHVM.
 OPTION:
+    -f      Do not include FPM into installation.
     -r      Install specific version of PHP.
     -h      Show this message.
 
@@ -20,8 +21,9 @@ function _exit() {
 }
 
 # Process arguments.
-while getopts ":hr:" OPTION; do
+while getopts ":hfr:" OPTION; do
     case $OPTION in
+        f) php_skip_fpm=0;;
         r) php_version="$OPTARG";;
         *) show_usage;;
     esac
@@ -77,8 +79,11 @@ else
         [ $? -ne 0 ] && _exit "Can't locate PHP $php_version package."
         echo "==> Install PHP $php_version package."
     fi
-    sudo apt-get install -qq php${php_version}-{cli,fpm,mysql,pgsql,sqlite,memcached,\
-curl,mbstring,mcrypt,gd,gmp,imagick,intl,xml} php-xdebug
+    sudo apt-get install -qq php${php_version}-{cli,mysql,pgsql,sqlite,memcached,\
+curl,mbstring,mcrypt,gd,gmp,imagick,intl,xml}
+    if [ -z "$php_skip_fpm" ]; then
+        sudo apt-get install php$php_version-fpm php-xdebug
+    fi
 
     # Configure installed PHP package.
     php_version=$(php --version 2> /dev/null | grep --color=never -oP '(?<=^PHP )\d+\.\d+')
@@ -119,5 +124,5 @@ xdebug.var_display_max_children = 256
 xdebug.var_display_max_data = 1024
 EOF
 
-    sudo service php${php_version}-fpm restart
+    [ -z "$php_skip_fpm" ] && sudo service php${php_version}-fpm restart
 fi
