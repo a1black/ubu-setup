@@ -65,7 +65,7 @@ if [ -n "$install_ver" ]; then
 else
     install_ver=$(wget -qO - $vagrant_url 2> /dev/null | \
         grep --color=never -oP "(?<=vagrant_)\d+\.\d+\.\d+" | sort -V | tail -n 1)
-    if [ $? -ne 0 ]; then
+    if [[ $? -ne 0 || -z "$install_ver" ]]; then
         _exit 'Fail retrieve number of latest Vagrant version.'
         # Probable fail: no internet, site is down or sort -V is unknown.
         # alternative to `sort -V` is `sort -t. -k1,1n -k2,2n -k3,3n`

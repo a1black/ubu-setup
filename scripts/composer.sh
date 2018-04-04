@@ -118,14 +118,12 @@ EOF
 export COMPOSER_HOME="$composer_home"
 export PATH="\$PATH:\$COMPOSER_HOME/vendor/bin"
 EOF
-    _eval $cuser "export /home/$cuser/.profile"
 fi
 
 # Recommendations.
-composer_recommends=('squizlabs/php_codesniffer=*' 'phpspec/phpspec=*')
-echo '==> Some of recommended packages to install globaly:'
+echo '==> How to install packages globaly:'
 if [ $HHVM_IS_INSTALLED -eq 0 ]; then
-    _eval $cuser "hhvm -v ResourceLimit.SocketDefaultTimeout=30 -v Http.SlowQueryThreshold=30000 -v Eval.Jit=false $composer_location/composer global require -o $(echo ${composer_recommends[@]})"
+    echo "hhvm -v ResourceLimit.SocketDefaultTimeout=30 -v Http.SlowQueryThreshold=30000 -v Eval.Jit=false $composer_location/composer global require -o phpunit/phpunit"
 else
-    _eval $cuser "$composer_location/composer global require -o $(echo ${composer_recommends[@]})"
+    echo "$composer_location/composer global require -o phpunit/phpunit=*"
 fi

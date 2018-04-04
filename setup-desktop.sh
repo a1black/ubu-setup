@@ -79,6 +79,9 @@ if [ "$php_enable" = 1 ]; then
     bash -- "$current_path/scripts/phpctags.sh" -l
 fi
 
+# Install development tools.
+bash -- "$current_path/scripts/lints.sh"
+
 # Virtualization.
 [ "$vbox_enable" = 1 ] && bash -- "$current_path/scripts/virtualbox.sh"
 [ "$vagrant_enable" = 1 ] && bash -- "$current_path/scripts/vagrant.sh"
