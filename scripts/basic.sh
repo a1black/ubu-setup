@@ -55,7 +55,7 @@ ADDRESS,IDENTIFICATION,MEASUREMENT,MONETARY,NAME,NUMERIC,PAPER,TELEPHONE}=$LCRU
 echo '==> Install essential packages.'
 sudo apt-get update -qq
 sudo apt-get install -qq software-properties-common build-essential pkg-config \
-    automake libevent-dev ca-certificates lsb-release libncurses5-dev
+    cmake automake libevent-dev ca-certificates lsb-release libncurses5-dev
 
 # Python 2 packages.
 sudo apt-get install -qq python-dev python-pip python-setuptools

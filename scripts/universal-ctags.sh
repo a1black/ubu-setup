@@ -93,6 +93,9 @@ cd $unctags_tmp > /dev/null
 # Build and install.
 echo '==> Build binaries from source code.'
 sh autogen.sh
+sed -i -e "s/VERSION='[-0-9a-zA-Z_\.]\+'/VERSION='5.8'/g" \
+    -e "s/PACKAGE_VERSION='[-0-9a-zA-Z_\.]\+'/PACKAGE_VERSION='5.8'/g" \
+    -e "s/PACKAGE_STRING='universal-ctags [-0-9a-zA-Z_\.]\+'/PACKAGE_STRING='universal-ctags 5.8'/g" configure
 ./configure --prefix=$unctags_location --program-prefix=$unctags_prefix
 make --quiet
 make install
