@@ -14,6 +14,12 @@ EOF
     exit 1
 }
 
+function _exit() {
+    echo "Error: $1"
+    echo '       Abort Git installation.'
+    exit ${2:-1}
+}
+
 # Execute command as user.
 # Args:
 #   $1  User name.
@@ -64,7 +70,7 @@ function github_get_repo_tag() {
 #   $3  File name.
 #   $4  Download location.
 function github_download_releas() {
-    wget -qO - "https://github.com/$1/releases/download/$2/$3" > "$4"
+    wget --timeout=10 --tries=2 -qO - "https://github.com/$1/releases/download/$2/$3" > "$4"
 }
 
 # Install binary from repository release page.
@@ -74,7 +80,7 @@ function github_download_releas() {
 #   $3  File name.
 #   $4  Install directory.
 function github_install_bin_releas() {
-    declare tag; tag=$(github_get_repo_tag "$2")
+    local tag=$(github_get_repo_tag "$2")
     if [ $? -ne 0 ]; then
         echo "Fail to retriev tag name for repo '$2'."
         return 1

@@ -53,6 +53,12 @@ if which tracker > /dev/null 2>&1; then
     tracker reset --hard
 fi
 
+# Remove some web launchers from desktop.
+launchers=('amazon')
+for launcher_name in ${launchers[@]}; do
+    sudo find /usr/share -iname "*$launcher_name*\.desktop" -exec rm '{}' \; -o -iname "*$launcher_name-launcher*" -exec rm '{}' \;
+done
+
 # Disable Gnome shell extensions.
 if gnome-shell-extension-tool -h > /dev/null 2>&1; then
     echo '==> Disable global Gnome shell extensions.'

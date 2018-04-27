@@ -36,7 +36,7 @@ fi
 echo '==> Install audio and video player.'
 sudo apt-get update -qq
 # Check if gnome desktop.
-dpkg -l 2> /dev/null | grep -qi 'gnome-\?desktop'
+dpkg -l 2> /dev/null | grep -qiE 'gnome-\?desktop'
 [ $? -eq 0 ] && sudo apt-get install -qq gnome-shell-extension-mediaplayer
 sudo apt-get install -qq clementine vlc
 

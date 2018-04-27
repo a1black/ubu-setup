@@ -30,7 +30,7 @@ echo '==> Remove pre-installed Gnome packages.'
 declare -a pkg_list=('audio' 'blog' 'calculator' 'calendar' 'dictionary' \
     'documents' 'games' 'games-app' 'gmail' 'chess' 'hearts' 'mahjongg' \
     'maps' 'mines' 'music' 'photos' 'recipes' 'sound-recorder' \
-    'sudoku' 'todo' 'translate' 'weather')
+    'sudoku' 'todo' 'translate' 'weather' 'online-accounts')
 pkg_str=$(printf ",%s" "${pkg_list[@]}")
 bash -c "sudo apt-get purge -qq gnome-{${pkg_str:1}}"
 unset pkg_list pkg_str
@@ -45,8 +45,9 @@ sudo apt-get purge -qq rhythmbox rhythmbox-data totem
 
 # Delete other garbage.
 echo '==> Remove the rest of pre-installed packages.'
-sudo apt-get purge -qq xterm imagemagick deja-dup vim-tiny \
-    shotwell shotwell-common transmission-common yelp*
+sudo apt-get purge -qq xterm imagemagick deja-dup vim-tiny cheese \
+    simple-scan shotwell shotwell-common transmission-common remmina-common \
+    aisleriot yelp*
 
 # Clean-up.
 echo '==> Remove unneeded dependencies.'
