@@ -30,10 +30,11 @@ echo '==> Remove pre-installed Gnome packages.'
 declare -a pkg_list=('audio' 'blog' 'calculator' 'calendar' 'dictionary' \
     'documents' 'games' 'games-app' 'gmail' 'chess' 'hearts' 'mahjongg' \
     'maps' 'mines' 'music' 'photos' 'recipes' 'sound-recorder' \
-    'sudoku' 'todo' 'translate' 'weather' 'online-accounts')
-pkg_str=$(printf ",%s" "${pkg_list[@]}")
-bash -c "sudo apt-get purge -qq gnome-{${pkg_str:1}}"
-unset pkg_list pkg_str
+    'sudoku' 'todo' 'translate' 'weather')
+for gnome_pkg in ${pkg_list[@]}; do
+    sudo apt-get purge -qq gnome-$gnome_pkg
+done
+unset pkg_list gnome_pkg
 
 # Remove Mozilla software and other web applications.
 echo '==> Remove Web applications.'

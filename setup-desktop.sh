@@ -28,13 +28,13 @@ set_timezone=Europe/Moscow
 git_dotfiles=https://github.com/a1black/dotfiles.git
 vim_plug=plug
 
-powerline_enable=1
-brew_enable=1
+powerline_enable=0
+brew_enable=0
 vbox_enable=1
 vagrant_enable=1
 #java_version=8
 php_enable=1
-pgadmin_version=3
+#pgadmin_version=3
 
 # Check privileges.
 if [ $UID -ne 0 ]; then
@@ -61,6 +61,7 @@ bash -- "$current_path/scripts/git.sh"
 
 # Customization.
 bash -- "$current_path/scripts/dotfiles.sh" -u $current_user -c $git_dotfiles
+bash -- "$current_path/scripts/powerline-font.sh"
 [ "$powerline_enable" = '1' ] && bash -- "$current_path/scripts/powerline.sh"
 
 # Command line tools.

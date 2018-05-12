@@ -68,4 +68,4 @@ sudo apt-get install -qq net-tools traceroute nmap wget curl nfs-common ncftp
 
 # Usefull packages.
 echo '==> Install other usefull packages.'
-sudo apt-get install -qq xsel htop zip unzip most
+sudo apt-get install -qq xsel htop zip unzip most dconf-editor

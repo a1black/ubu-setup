@@ -79,15 +79,25 @@ else
         [ $? -ne 0 ] && _exit "Can't locate PHP $php_version package."
         echo "==> Install PHP $php_version package."
     fi
-    sudo apt-get install -qq php${php_version}-{cli,mysql,pgsql,sqlite3,memcached,\
-curl,mbstring,mcrypt,gd,gmp,imagick,intl,xml}
-    if [ -z "$php_skip_fpm" ]; then
-        sudo apt-get install php$php_version-fpm php-xdebug
-    fi
+    sudo apt-get install -qq php${php_version}-{common,cli}
 
-    # Configure installed PHP package.
     php_version=$(php --version 2> /dev/null | grep --color=never -oP '(?<=^PHP )\d+\.\d+')
     [ $? -ne 0 ] && _exit 'Installation failed.'
+    # Install PHP extensions.
+    if [ -z "$php_skip_fpm" ]; then
+        echo "==> Install PHP FPM extension."
+        sudo apt-get install php$php_version-fpm php-xdebug
+    fi
+    echo "==> Install PHP database extensions."
+    for php_pkg in mysql pgsql sqlite3 memcached; do
+        sudo apt-get install -qq php$php_version-$php_pkg
+    done
+    echo "==> Install PHP extensions."
+    for php_pkg in curl mbstring mcrypt gd gmp imagick intl xml; do
+        sudo apt-get install -qq php$php_version-$php_pkg
+    done
+
+    # Configure installed PHP package.
     echo '==> Configure PHP FPM.'
     php_www_conf=/etc/php/$php_version/fpm/pool.d/www.conf
     php_ini=/etc/php/$php_version/fpm/php.ini
