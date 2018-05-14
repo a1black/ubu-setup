@@ -32,12 +32,6 @@ if [ $UID -ne 0 ]; then
     exit 126
 fi
 
-# Disable animated boot logo.
-echo '==> Disable splash image on boot screen.'
-sudo sed -i.orig '/^GRUB_CMDLINE_LINUX_DEFAULT/s/\(quiet \)\?splash//g' \
-    /etc/default/grub
-sudo update-grub > /dev/null 2>&1
-
 # Disable Tracker.
 if which tracker > /dev/null 2>&1; then
     echo '==> Disable desktop MetaTracer. (wiki.ubuntu.com/Tracker)'
@@ -81,7 +75,3 @@ if systemctl --version > /dev/null 2>&1; then
     sudo systemctl stop bluetooth
     sudo systemctl disable bluetooth
 fi
-
-# Disable Whoopsie service.
-echo "==> Uninstall Whoopsie Service."
-sudo apt-get purge -qq whoopsie

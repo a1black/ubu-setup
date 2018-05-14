@@ -37,7 +37,7 @@ done
 
 # Remove Xfce pre-installed applications.
 echo '==> Remove pre-installed Xfce packages.'
-declare -a pkg_list=('xfburn' xfce4-dict' 'xfce4-notes' 'xfce4-screenshooter' 'mousepad')
+declare -a pkg_list=('xfburn' 'xfce4-dict' 'xfce4-notes' 'xfce4-screenshooter' 'mousepad')
 
 # Remove pre-installed web applications.
 echo '==> Remove pre-installed internet applications.'
@@ -59,7 +59,7 @@ echo '==> Remove the rest of pre-installed packages.'
 declare -a pkg_list=('aisleriot' 'sgt-puzzles' 'cheese' \
     'remmina' 'remmina-common' 'deja-dup' 'simple-scan' \
     'catfish' 'imagemagick' 'shotwell' 'shotwell-common' \
-    'onboard' 'onboard-common' 'yelp*')
+    'onboard' 'onboard-common' 'whoopsie' 'yelp*')
 for pkg_name in ${pkg_list[@]}; do
     sudo apt-get purge -qq $pkg_name
 done
