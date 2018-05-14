@@ -31,25 +31,41 @@ declare -a pkg_list=('audio' 'blog' 'calculator' 'calendar' 'dictionary' \
     'documents' 'games' 'games-app' 'gmail' 'chess' 'hearts' 'mahjongg' \
     'maps' 'mines' 'music' 'photos' 'recipes' 'sound-recorder' \
     'sudoku' 'todo' 'translate' 'weather')
-for gnome_pkg in ${pkg_list[@]}; do
-    sudo apt-get purge -qq gnome-$gnome_pkg
+for pkg_name in ${pkg_list[@]}; do
+    sudo apt-get purge -qq gnome-$pkg_name
 done
-unset pkg_list gnome_pkg
 
-# Remove Mozilla software and other web applications.
-echo '==> Remove Web applications.'
-sudo apt-get purge -qq firefox thunderbird chromium
+# Remove Xfce pre-installed applications.
+echo '==> Remove pre-installed Xfce packages.'
+declare -a pkg_list=('xfburn' xfce4-dict' 'xfce4-notes' 'xfce4-screenshooter' 'mousepad')
+
+# Remove pre-installed web applications.
+echo '==> Remove pre-installed internet applications.'
+declare -a pkg_list=('firefox' 'thunderbird' 'chromium' 'pidgin' \
+    'transmission-common' 'gigolo')
+for pkg_name in ${pkg_list[@]}; do
+    sudo apt-get purge -qq $pkg_name
+done
 
 # Delete pre-installed media applications.
 echo '==> Remove default media applications.'
-sudo apt-get purge -qq rhythmbox rhythmbox-data totem
+declare -a pkg_list=('rhythmbox' 'rhythmbox-data' 'totem' 'parole')
+for pkg_name in ${pkg_list[@]}; do
+    sudo apt-get purge -qq $pkg_name
+done
 
-# Delete other garbage.
+# Delete other pre-installed applications.
 echo '==> Remove the rest of pre-installed packages.'
-sudo apt-get purge -qq xterm imagemagick deja-dup vim-tiny cheese \
-    simple-scan shotwell shotwell-common transmission-common remmina-common \
-    aisleriot yelp*
+declare -a pkg_list=('aisleriot' 'sgt-puzzles' 'cheese' \
+    'remmina' 'remmina-common' 'deja-dup' 'simple-scan' \
+    'catfish' 'imagemagick' 'shotwell' 'shotwell-common' \
+    'onboard' 'onboard-common' 'yelp*')
+for pkg_name in ${pkg_list[@]}; do
+    sudo apt-get purge -qq $pkg_name
+done
 
 # Clean-up.
 echo '==> Remove unneeded dependencies.'
 sudo apt-get autoremove -qq
+
+unset pkg_list pkg_name

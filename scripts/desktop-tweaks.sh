@@ -34,7 +34,7 @@ fi
 
 # Disable animated boot logo.
 echo '==> Disable splash image on boot screen.'
-sudo sed -i.orig '/^GRUB_CMDLINE_LINUX_DEFAULT/s/\(quiet \)\?splash/verbose/g' \
+sudo sed -i.orig '/^GRUB_CMDLINE_LINUX_DEFAULT/s/\(quiet \)\?splash//g' \
     /etc/default/grub
 sudo update-grub > /dev/null 2>&1
 
