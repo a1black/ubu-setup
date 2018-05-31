@@ -48,6 +48,7 @@ fi
 #if [ $? -ne 0 ]; then
     echo '==> Add unofficial Oracle JDK PPA to source list.'
     sudo add-apt-repository -y ppa:webupd8team/java
+    sudo add-apt-repository -y ppa:linuxuprising/java
     sudo apt-get update -qq
 #fi
 

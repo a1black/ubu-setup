@@ -52,6 +52,7 @@ current_path=${BASH_SOURCE[0]%/*}
 # List of instructions.
 # System tweaks.
 bash -- "$current_path/scripts/net-tweaks.sh" || exit 1
+bash -- "$current_path/scripts/boot-tweaks.sh"
 bash -- "$current_path/scripts/desktop-tweaks.sh"
 
 # Install most neccessary packages.

@@ -39,7 +39,8 @@ if lspci -nn | grep -q '\[03.\+AMD'; then
 fi
 
 #echo '==> Make Grub menu available by default.'
-#sed -i '/^GRUB_HIDDEN_TIMEOUT/s/\(.\+\)/#\1/' /etc/default/grub
+sed -i '/^GRUB_HIDDEN_TIMEOUT/s/\(.\+\)/#\1/' /etc/default/grub
+sed -i '/^GRUB_HIDDEN_TIMEOUT_QUIET/s/\(.\+\)/#\1/' /etc/default/grub
 
 # Clean up and update.
 sed -i '/^GRUB_CMDLINE_LINUX_DEFAULT/s/\s\{2,\}/ /g' /etc/default/grub
